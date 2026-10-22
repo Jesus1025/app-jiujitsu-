@@ -2,7 +2,7 @@
 
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(45);
+select plan(48);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-00000000000a', 'dueno.a@test.cl', '{"full_name": "Dueño A"}'),
@@ -202,6 +202,19 @@ select is(
 );
 
 set local role authenticated;
+select throws_ok(
+  'select checkin_code from public.academies',
+  '42501', null,
+  'El alumno no puede leer el código del QR de asistencia'
+);
+select throws_ok(
+  format('select public.get_checkin_code(%L)', :'academy_a'),
+  '42501', null,
+  'El alumno no puede pedir el código del QR por RPC'
+);
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-00000000000a"}';
+select is(public.get_checkin_code(:'academy_a'), 'QRAAAA', 'El dueño obtiene el código del QR');
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-000000000001"}';
 select is(
   (select total_classes from public.student_progress where student_id = :'student_s'),
   2,

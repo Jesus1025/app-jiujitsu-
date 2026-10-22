@@ -4,18 +4,17 @@ import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
 import { Spacing } from '@/constants/theme';
-import { roleLabels, useMyMemberships } from '@/features/academies/api';
+import { useMyMemberships } from '@/features/academies/api';
+import { PendingRequests } from '@/features/academies/onboarding';
 import { useAuth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
 export default function OnboardingScreen() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
-  const { data, refetch, isRefetching } = useMyMemberships();
-  const pending = (data ?? []).filter((m) => m.status === 'pending');
+  const { refetch, isRefetching } = useMyMemberships();
   const firstName = (session?.user.user_metadata.full_name as string | undefined)?.split(' ')[0];
 
   async function handleSignOut() {
@@ -24,28 +23,16 @@ export default function OnboardingScreen() {
   }
 
   return (
-    <Screen>
+    <Screen refreshing={isRefetching} onRefresh={refetch}>
       <View style={styles.header}>
         <ThemedText type="title">¡Hola{firstName ? `, ${firstName}` : ''}!</ThemedText>
         <ThemedText themeColor="textSecondary">
-          Para empezar, crea tu academia o únete a una con el código que te dio tu profesor.
+          Para empezar, únete a tu academia con el código que te dio tu profesor, o crea la tuya si
+          eres profesor.
         </ThemedText>
       </View>
 
-      {pending.map((m) => (
-        <Card key={m.id}>
-          <ThemedText type="smallBold">Solicitud enviada a {m.academy?.name}</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            Como {roleLabels[m.role].toLowerCase()}. Cuando te aprueben podrás entrar.
-          </ThemedText>
-          <Button
-            title="Revisar de nuevo"
-            variant="secondary"
-            onPress={() => refetch()}
-            loading={isRefetching}
-          />
-        </Card>
-      ))}
+      <PendingRequests base="onboarding" />
 
       <Button title="Unirme con un código" onPress={() => router.push('/onboarding/join')} />
       <Button
@@ -65,9 +52,7 @@ const styles = StyleSheet.create({
   header: {
     gap: Spacing.two,
     marginTop: Spacing.five,
-    marginBottom: Spacing.three,
+    marginBottom: Spacing.two,
   },
-  footer: {
-    marginTop: 'auto',
-  },
+  footer: { marginTop: 'auto' },
 });

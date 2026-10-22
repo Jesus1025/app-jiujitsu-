@@ -4,13 +4,16 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Spacing } from '@/constants/theme';
-import { pickActiveMembership, useMyMemberships } from '@/features/academies/api';
+import { ActiveAcademyProvider, useOptionalAcademy } from '@/features/academies/active-academy';
+import { useMyMemberships } from '@/features/academies/api';
+import { usePushRegistration } from '@/features/notifications/push';
 import { useTheme } from '@/hooks/use-theme';
 import { errorMessage } from '@/lib/errors';
 
 export default function AppLayout() {
   const theme = useTheme();
-  const { data, isLoading, error, refetch } = useMyMemberships();
+  const { isLoading, error, refetch } = useMyMemberships();
+  usePushRegistration();
 
   if (isLoading) {
     return (
@@ -29,18 +32,28 @@ export default function AppLayout() {
     );
   }
 
-  // Sin una academia activa, el usuario solo ve la pantalla para crear o unirse a una.
-  const hasAcademy = !!pickActiveMembership(data);
+  return (
+    <ActiveAcademyProvider>
+      <AppStack />
+    </ActiveAcademyProvider>
+  );
+}
+
+function AppStack() {
+  const hasAcademy = !!useOptionalAcademy();
 
   return (
     <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
+      {/* Sin una academia activa solo se ve la entrada: crear o unirse a una. */}
       <Stack.Protected guard={hasAcademy}>
-        <Stack.Screen name="index" options={{ title: 'Inicio' }} />
+        <Stack.Screen name="(academy)" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Protected guard={!hasAcademy}>
         <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding/create-academy" options={{ title: 'Crear academia' }} />
         <Stack.Screen name="onboarding/join" options={{ title: 'Unirme a una academia' }} />
+        <Stack.Screen name="onboarding/student-form" options={{ title: 'Ficha' }} />
+        <Stack.Screen name="onboarding/waiver" options={{ title: 'Exoneración' }} />
       </Stack.Protected>
     </Stack>
   );

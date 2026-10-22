@@ -73,11 +73,29 @@ create table public.posts (
   id uuid primary key default gen_random_uuid(),
   academy_id uuid not null references public.academies (id) on delete cascade,
   author_id uuid not null references public.profiles (id) on delete cascade default auth.uid(),
+  -- Copia del nombre al publicar: los alumnos no pueden leer los perfiles de otros alumnos.
+  author_name text not null default '',
   body text not null check (length(trim(body)) between 1 and 2000),
   created_at timestamptz not null default now()
 );
 
 create index posts_academy_idx on public.posts (academy_id, created_at desc);
+
+create function public.set_post_author_name()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  select full_name into new.author_name from public.profiles where id = new.author_id;
+  new.author_name := coalesce(new.author_name, '');
+  return new;
+end;
+$$;
+
+create trigger posts_author_name before insert on public.posts
+  for each row execute function public.set_post_author_name();
 
 -- ---------------------------------------------------------------------------
 -- Tienda e inventario

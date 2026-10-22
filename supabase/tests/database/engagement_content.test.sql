@@ -3,7 +3,7 @@
 
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(37);
+select plan(38);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-00000000000a', 'dueno.a@test.cl', '{"full_name": "Dueño A"}'),
@@ -179,6 +179,7 @@ select lives_ok(
   format($$ insert into public.posts (academy_id, body) values (%L, '¡Excelente clase hoy!') $$, :'academy_a'),
   'El alumno publica en el muro'
 );
+select is((select author_name from public.posts), 'Alumno Uno', 'La publicación guarda el nombre del autor');
 set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-00000000000b"}';
 select is((select count(*)::int from public.posts), 0, 'Otra academia no ve el muro');
 
