@@ -39,7 +39,7 @@ export function openNotificationTarget(data: Record<string, unknown> | null | un
   }
 }
 
-async function registerToken(userId: string) {
+async function registerToken() {
   // Las notificaciones push necesitan un teléfono real y un proyecto EAS (ver README).
   if (Platform.OS === 'web' || !Device.isDevice) return;
   const projectId =
@@ -60,12 +60,7 @@ async function registerToken(userId: string) {
   if (status !== 'granted') return;
 
   const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
-  await supabase.from('push_tokens').upsert({
-    token,
-    user_id: userId,
-    platform: Platform.OS,
-    updated_at: new Date().toISOString(),
-  });
+  await supabase.rpc('register_push_token', { p_token: token, p_platform: Platform.OS });
 }
 
 /** Registra el teléfono para recibir push y abre la pantalla correcta al tocar una notificación. */
@@ -75,7 +70,7 @@ export function usePushRegistration() {
 
   useEffect(() => {
     if (!userId) return;
-    registerToken(userId).catch(() => {
+    registerToken().catch(() => {
       // Sin push la app sigue funcionando: las notificaciones se ven dentro de la app.
     });
   }, [userId]);

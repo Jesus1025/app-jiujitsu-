@@ -147,3 +147,71 @@ export function parseAmount(text: string) {
 export function fullName(person: { first_name: string; last_name: string }) {
   return `${person.first_name} ${person.last_name}`;
 }
+
+/** Minutos de diferencia entre la hora de la zona y UTC en un instante dado. */
+function zoneOffsetMinutes(utcMillis: number, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(new Date(utcMillis));
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  const asUtc = Date.UTC(
+    get('year'),
+    get('month') - 1,
+    get('day'),
+    get('hour'),
+    get('minute'),
+    get('second'),
+  );
+  return (asUtc - utcMillis) / 60000;
+}
+
+/** Fecha 'AAAA-MM-DD' + hora 'HH:MM' en la zona de la academia → timestamp ISO (UTC). */
+export function zonedToIso(date: string, time: string, timeZone: string) {
+  const [y, m, d] = date.split('-').map(Number);
+  const [h, min] = time.split(':').map(Number);
+  const guess = Date.UTC(y, m - 1, d, h, min);
+  try {
+    const offset = zoneOffsetMinutes(guess, timeZone);
+    let utc = guess - offset * 60000;
+    // Ajuste si justo hay cambio de horario entre la estimación y el resultado.
+    const corrected = zoneOffsetMinutes(utc, timeZone);
+    if (corrected !== offset) utc = guess - corrected * 60000;
+    return new Date(utc).toISOString();
+  } catch {
+    return new Date(y, m - 1, d, h, min).toISOString();
+  }
+}
+
+/** Timestamp ISO → { date: 'AAAA-MM-DD', time: 'HH:MM' } en la zona de la academia. */
+export function isoToZoned(iso: string, timeZone: string) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).formatToParts(new Date(iso));
+    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '00';
+    return {
+      date: `${get('year')}-${get('month')}-${get('day')}`,
+      time: `${get('hour')}:${get('minute')}`,
+    };
+  } catch {
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return {
+      date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+      time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+    };
+  }
+}

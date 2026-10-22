@@ -123,7 +123,10 @@ export function useSetMembershipStatus() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: Enums<'membership_status'> }) => {
-      const { error } = await supabase.from('memberships').update({ status }).eq('id', id);
+      const { error } = await supabase.rpc('set_membership_status', {
+        p_membership: id,
+        p_status: status,
+      });
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['memberships'] }),

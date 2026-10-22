@@ -57,6 +57,7 @@ export function useMyStudents(academyId: string | undefined) {
 
 export function useStudent(id: string) {
   return useQuery({
+    enabled: !!id,
     queryKey: ['students', 'one', id],
     queryFn: async () => {
       const { data, error } = await supabase.from('students').select('*').eq('id', id).single();

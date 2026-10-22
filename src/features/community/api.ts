@@ -34,6 +34,7 @@ export function useEvents(academyId: string, { upcomingOnly = true } = {}) {
 
 export function useEvent(id: string) {
   return useQuery({
+    enabled: !!id,
     queryKey: ['events', 'one', id],
     queryFn: async () => {
       const { data, error } = await supabase.from('events').select('*').eq('id', id).single();

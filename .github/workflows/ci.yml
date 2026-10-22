@@ -29,3 +29,17 @@ jobs:
           version: latest
       - run: supabase db start
       - run: supabase test db
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Compilar la app con los tipos generados desde la base real
+        run: |
+          supabase gen types typescript --local > src/types/database.ts
+          npx tsc --noEmit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: database-types
+          path: src/types/database.ts

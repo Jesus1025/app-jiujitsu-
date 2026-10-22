@@ -3,7 +3,7 @@
 
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(28);
+select plan(34);
 
 -- Usuarios de prueba
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -174,6 +174,38 @@ select throws_ok(
   '42501', null,
   'El instructor no puede aprobar a otros instructores'
 );
+
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-000000000002", "role": "authenticated"}';
+select throws_ok(
+  format('select public.set_membership_status(%L, %L)', :'alumno2_membership', 'inactive'),
+  '42501', null,
+  'Un instructor no puede quitar el acceso a un miembro'
+);
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-00000000000a", "role": "authenticated"}';
+select is(
+  (public.set_membership_status(:'instructor_membership', 'inactive')).status,
+  'inactive'::public.membership_status,
+  'El dueño quita el acceso a un instructor'
+);
+select throws_ok(
+  $$ select public.set_membership_status(
+       (select id from public.memberships where role = 'owner' limit 1), 'inactive') $$,
+  '42501', null,
+  'Nadie puede quitarle el acceso al dueño'
+);
+
+select lives_ok($$ select public.register_push_token('ExponentPushToken[abc]', 'android') $$,
+  'El dueño registra el token push de su teléfono');
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-000000000001", "role": "authenticated"}';
+select lives_ok($$ select public.register_push_token('ExponentPushToken[abc]', 'android') $$,
+  'Otra cuenta inicia sesión en el mismo teléfono');
+reset role;
+select is(
+  (select user_id from public.push_tokens where token = 'ExponentPushToken[abc]'),
+  '00000000-0000-0000-0000-000000000001'::uuid,
+  'Un token push usado por otra cuenta pasa a la cuenta actual'
+);
+set local role authenticated;
 
 -- ---------------------------------------------------------------------------
 -- Usuarios anónimos

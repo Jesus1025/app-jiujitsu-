@@ -548,6 +548,10 @@ export type Database = {
         Returns: MembershipRow;
       };
       regenerate_join_code: { Args: { p_academy: string }; Returns: string };
+      set_membership_status: {
+        Args: { p_membership: string; p_status: MembershipStatus };
+        Returns: MembershipRow;
+      };
       link_student_account: { Args: { p_student: string; p_user: string }; Returns: StudentRow };
       rotate_checkin_code: { Args: { p_academy: string }; Returns: string };
       get_checkin_code: { Args: { p_academy: string }; Returns: string };
@@ -565,6 +569,7 @@ export type Database = {
         Returns: ReferralRow;
       };
       mark_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
+      register_push_token: { Args: { p_token: string; p_platform?: string }; Returns: undefined };
       register_for_event: {
         Args: { p_event: string; p_student: string };
         Returns: EventRegistrationRow;
