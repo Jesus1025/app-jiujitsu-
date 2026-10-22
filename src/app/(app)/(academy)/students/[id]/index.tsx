@@ -1,8 +1,10 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 
+import { goBack } from '@/lib/navigation';
+import { Alert } from '@/lib/alert';
 import { BeltBadge } from '@/components/belt-badge';
 import { ThemedText } from '@/components/themed-text';
 import { Avatar } from '@/components/ui/avatar';
@@ -44,7 +46,7 @@ import {
 } from '@/features/students/helpers';
 import { exportStudentPdf } from '@/features/students/pdf';
 import { errorMessage } from '@/lib/errors';
-import { ageOn, formatDate, formatMoney, fullName, todayIn } from '@/lib/format';
+import { ageOn, formatDate, formatGrade, formatMoney, fullName, todayIn } from '@/lib/format';
 
 export default function StudentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -119,7 +121,7 @@ export default function StudentDetailScreen() {
           style: 'destructive',
           onPress: () =>
             remove.mutate(student!.id, {
-              onSuccess: () => router.back(),
+              onSuccess: () => goBack(),
               onError: (e) => Alert.alert('No se pudo eliminar', errorMessage(e)),
             }),
         },
@@ -401,7 +403,7 @@ export default function StudentDetailScreen() {
               subtitle={
                 a.submitted_at ? `Respondida el ${formatDate(a.submitted_at)}` : 'Pendiente'
               }
-              right={a.grade !== null ? `Nota ${String(a.grade).replace('.', ',')}` : undefined}
+              right={a.grade !== null ? `Nota ${formatGrade(a.grade)}` : undefined}
             />
           ))}
         </Section>

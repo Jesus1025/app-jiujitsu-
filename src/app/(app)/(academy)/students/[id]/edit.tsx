@@ -1,5 +1,6 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 
+import { goBack } from '@/lib/navigation';
 import { Screen } from '@/components/ui/screen';
 import { QueryState } from '@/components/ui/states';
 import { useAcademy } from '@/features/academies/active-academy';
@@ -25,7 +26,7 @@ export default function EditStudentScreen() {
           onSave={async (values, photoUri) => {
             await update.mutateAsync({ id: student.id, values });
             if (photoUri) await upload.mutateAsync({ student, uri: photoUri });
-            router.back();
+            goBack();
           }}
         />
       ) : (

@@ -1,6 +1,7 @@
-import { router, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useState } from 'react';
 
+import { goBack } from '@/lib/navigation';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { FormError } from '@/components/ui/form-error';
@@ -33,7 +34,7 @@ export default function ReferralScreen() {
     setError(null);
     register.mutate(
       { referrerId, referredId, percent: Number(percent) },
-      { onSuccess: () => router.back(), onError: (e) => setError(errorMessage(e)) },
+      { onSuccess: () => goBack(), onError: (e) => setError(errorMessage(e)) },
     );
   }
 

@@ -2,9 +2,9 @@ import * as DocumentPicker from 'expo-document-picker';
 import { Stack } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { Alert } from '@/lib/alert';
 import { Button } from '@/components/ui/button';
 import { FormError } from '@/components/ui/form-error';
 import { ListItem } from '@/components/ui/list-item';

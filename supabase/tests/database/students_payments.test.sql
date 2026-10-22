@@ -2,7 +2,7 @@
 
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(48);
+select plan(50);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-00000000000a', 'dueno.a@test.cl', '{"full_name": "Dueño A"}'),
@@ -95,6 +95,11 @@ select is(
 
 set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-000000000001"}';
 select is((select count(*)::int from public.students), 1, 'El alumno solo ve su propia ficha');
+select is(
+  (select b.name from public.rank_awards ra join public.belts b on b.id = ra.belt_id where ra.student_id = :'student_s'),
+  'Blanco',
+  'Al aprobar la ficha se asigna el cinturón blanco inicial'
+);
 select throws_ok(
   format($$ update public.students set status = 'inactive' where id = %L $$, :'student_s'),
   '42501', null,
@@ -138,8 +143,8 @@ select throws_ok(
 
 set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-00000000000a"}';
 select lives_ok(
-  format($$ insert into public.rank_awards (student_id, belt_id, degree, awarded_at) values (%L, %L, 1, '2026-01-10') $$,
-    :'student_s', :'blue_belt'),
+  format($$ insert into public.rank_awards (academy_id, student_id, belt_id, degree) values (%L, %L, %L, 1) $$,
+    :'academy_a', :'student_s', :'blue_belt'),
   'El dueño otorga cinturón azul 1° grado'
 );
 
@@ -202,6 +207,18 @@ select is(
 );
 
 set local role authenticated;
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-00000000000a"}';
+insert into public.class_schedules (academy_id, weekday, start_time, end_time, title)
+values (:'academy_a', 4, '00:05', '01:00', 'Clase de medianoche');
+reset role;
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-000000000001"}';
+select is(
+  (public.check_in_at(:'academy_a', 'QRAAAA', null, 'qr', '2026-10-22 00:20:00 America/Santiago')).is_late,
+  true,
+  'Una clase que empieza justo después de medianoche también acepta asistencia'
+);
+set local role authenticated;
+set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-000000000001"}';
 select throws_ok(
   'select checkin_code from public.academies',
   '42501', null,
@@ -217,7 +234,7 @@ select is(public.get_checkin_code(:'academy_a'), 'QRAAAA', 'El dueño obtiene el
 set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-000000000001"}';
 select is(
   (select total_classes from public.student_progress where student_id = :'student_s'),
-  2,
+  3,
   'El progreso cuenta las clases asistidas'
 );
 set local request.jwt.claims to '{"sub": "00000000-0000-0000-0000-00000000000b"}';

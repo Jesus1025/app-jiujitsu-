@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import { Platform } from 'react-native';
 
 import { supabase } from '@/lib/supabase';
 
@@ -8,7 +9,11 @@ export const BUCKET = 'academy';
 
 /** Sube un archivo local (uri de la cámara, galería o selector de documentos) al bucket privado. */
 export async function uploadFile(path: string, localUri: string, contentType?: string) {
-  const body = await new File(localUri).arrayBuffer();
+  // En web el selector entrega una URL blob: que se lee con fetch.
+  const body =
+    Platform.OS === 'web'
+      ? await (await fetch(localUri)).arrayBuffer()
+      : await new File(localUri).arrayBuffer();
   const { error } = await supabase.storage
     .from(BUCKET)
     .upload(path, body, { contentType, upsert: true });
@@ -41,6 +46,15 @@ export function useSignedUrl(path: string | null | undefined) {
 
 /** Escribe un texto en un archivo temporal y abre el menú de compartir (WhatsApp, correo, etc.). */
 export async function shareTextFile(fileName: string, content: string, mimeType: string) {
+  if (Platform.OS === 'web') {
+    const url = URL.createObjectURL(new Blob([content], { type: mimeType }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
   const file = new File(Paths.cache, fileName);
   file.create({ overwrite: true });
   file.write(content);

@@ -215,3 +215,8 @@ export function isoToZoned(iso: string, timeZone: string) {
     };
   }
 }
+
+/** Nota chilena con un decimal y coma: 7 → '7,0'. */
+export function formatGrade(grade: number | null | undefined) {
+  return grade === null || grade === undefined ? '—' : grade.toFixed(1).replace('.', ',');
+}

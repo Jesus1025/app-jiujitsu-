@@ -1,7 +1,9 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { goBack } from '@/lib/navigation';
+import { Alert } from '@/lib/alert';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { TimeField } from '@/components/ui/date-field';
@@ -83,7 +85,7 @@ function ScheduleForm({ id, existing }: { id?: string; existing?: ClassSchedule 
         instructor_id: instructorId,
         active,
       },
-      { onSuccess: () => router.back(), onError: (e) => setError(errorMessage(e)) },
+      { onSuccess: () => goBack(), onError: (e) => setError(errorMessage(e)) },
     );
   }
 
@@ -96,7 +98,7 @@ function ScheduleForm({ id, existing }: { id?: string; existing?: ClassSchedule 
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: () => remove.mutate(id!, { onSuccess: () => router.back() }),
+          onPress: () => remove.mutate(id!, { onSuccess: () => goBack() }),
         },
       ],
     );

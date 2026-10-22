@@ -1,5 +1,6 @@
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { Platform } from 'react-native';
 
 import { signedUrl } from '@/lib/files';
 import { ageOn, formatDate, fullName } from '@/lib/format';
@@ -105,6 +106,11 @@ export async function exportStudentPdf(args: {
   }
 </body></html>`;
 
+  if (Platform.OS === 'web') {
+    // En el navegador se abre el diálogo de impresión (permite "Guardar como PDF").
+    await Print.printAsync({ html });
+    return;
+  }
   const { uri } = await Print.printToFileAsync({ html });
   await Sharing.shareAsync(uri, {
     mimeType: 'application/pdf',

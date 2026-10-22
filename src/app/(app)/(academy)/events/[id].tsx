@@ -1,6 +1,7 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { Alert } from 'react-native';
 
+import { goBack } from '@/lib/navigation';
+import { Alert } from '@/lib/alert';
 import { ThemedText } from '@/components/themed-text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,7 @@ export default function EventScreen() {
       {
         text: 'Eliminar',
         style: 'destructive',
-        onPress: () => remove.mutate(e.id, { onSuccess: () => router.back() }),
+        onPress: () => remove.mutate(e.id, { onSuccess: () => goBack() }),
       },
     ]);
   }

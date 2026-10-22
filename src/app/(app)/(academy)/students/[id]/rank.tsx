@@ -1,7 +1,8 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { goBack } from '@/lib/navigation';
 import { BeltBadge } from '@/components/belt-badge';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
@@ -68,7 +69,7 @@ export default function AwardRankScreen() {
         awarded_at: awardedAt,
         notes: notes.trim() || null,
       },
-      { onSuccess: () => router.back(), onError: (e) => setFormError(errorMessage(e)) },
+      { onSuccess: () => goBack(), onError: (e) => setFormError(errorMessage(e)) },
     );
   }
 

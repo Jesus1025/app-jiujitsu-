@@ -1,5 +1,6 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 
+import { goBack } from '@/lib/navigation';
 import { Screen } from '@/components/ui/screen';
 import { QueryState } from '@/components/ui/states';
 import { useStudent } from '@/features/students/api';
@@ -18,7 +19,7 @@ export default function StudentWaiverScreen() {
         <WaiverForm
           student={student}
           defaultSignerName={session?.user.user_metadata.full_name as string}
-          onDone={() => router.back()}
+          onDone={() => goBack()}
         />
       ) : (
         <QueryState isLoading={isLoading} error={error} onRetry={refetch} />

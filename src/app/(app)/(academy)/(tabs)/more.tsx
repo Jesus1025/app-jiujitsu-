@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { type Href, router } from 'expo-router';
 import type { ComponentProps } from 'react';
-import { Alert } from 'react-native';
 
+import { Alert } from '@/lib/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ListItem } from '@/components/ui/list-item';

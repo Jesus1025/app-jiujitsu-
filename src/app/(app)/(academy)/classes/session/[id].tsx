@@ -1,7 +1,8 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { Alert } from '@/lib/alert';
 import { ThemedText } from '@/components/themed-text';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -88,7 +89,9 @@ export default function SessionScreen() {
           {formatDateTime(current.starts_at, academy.timezone)} ·{' '}
           {category ? category.name : 'Todas las categorías'}
         </ThemedText>
-        <ThemedText type="subtitle">{present.size} presentes</ThemedText>
+        <ThemedText type="subtitle">
+          {present.size} {present.size === 1 ? 'presente' : 'presentes'}
+        </ThemedText>
         {current.status === 'cancelled' ? <Badge label="Clase cancelada" tone="danger" /> : null}
       </Card>
 

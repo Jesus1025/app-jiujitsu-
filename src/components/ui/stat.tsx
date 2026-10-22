@@ -14,7 +14,7 @@ export function Stat({ label, value }: { label: string; value: string | number }
         styles.stat,
         { backgroundColor: theme.backgroundElement, borderColor: theme.border },
       ]}>
-      <ThemedText type="subtitle" numberOfLines={1} adjustsFontSizeToFit>
+      <ThemedText type="subtitle" numberOfLines={2}>
         {value}
       </ThemedText>
       <ThemedText type="small" themeColor="textSecondary" numberOfLines={2}>

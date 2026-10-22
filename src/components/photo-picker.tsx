@@ -1,7 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Alert } from '@/lib/alert';
 import { ThemedText } from '@/components/themed-text';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';

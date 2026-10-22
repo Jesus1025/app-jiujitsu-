@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Alert } from '@/lib/alert';
 import { ThemedText } from '@/components/themed-text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -103,7 +104,10 @@ export default function ClassesScreen() {
                   session?.status === 'cancelled' ? (
                     <Badge label="Cancelada" tone="danger" />
                   ) : session ? (
-                    <Badge label={`${count} presentes`} tone="primary" />
+                    <Badge
+                      label={`${count} ${count === 1 ? 'presente' : 'presentes'}`}
+                      tone="primary"
+                    />
                   ) : undefined
                 }
                 onPress={() => openClass(schedule.id)}

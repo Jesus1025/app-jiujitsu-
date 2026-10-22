@@ -1,7 +1,7 @@
 import { router, Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert } from 'react-native';
 
+import { Alert } from '@/lib/alert';
 import { BeltBadge } from '@/components/belt-badge';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';

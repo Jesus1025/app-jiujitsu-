@@ -1,6 +1,7 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
+import { goBack } from '@/lib/navigation';
 import { Button } from '@/components/ui/button';
 import { DateField } from '@/components/ui/date-field';
 import { FormError } from '@/components/ui/form-error';
@@ -46,7 +47,7 @@ export default function NewChargeScreen() {
         amount,
         due_date: dueDate,
       },
-      { onSuccess: () => router.back(), onError: (e) => setError(errorMessage(e)) },
+      { onSuccess: () => goBack(), onError: (e) => setError(errorMessage(e)) },
     );
   }
 

@@ -1,8 +1,9 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { goBack } from '@/lib/navigation';
 import { ThemedText } from '@/components/themed-text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -115,7 +116,7 @@ function CheckinTarget({ target }: { target: Target }) {
     return (
       <Card>
         <ThemedText>No tienes una ficha activa en esta academia.</ThemedText>
-        <Button title="Volver" variant="secondary" onPress={() => router.back()} />
+        <Button title="Volver" variant="secondary" onPress={() => goBack()} />
       </Card>
     );
   }
@@ -148,7 +149,7 @@ function CheckinTarget({ target }: { target: Target }) {
           </Card>
         );
       })}
-      <Button title="Listo" variant="secondary" onPress={() => router.back()} />
+      <Button title="Listo" variant="secondary" onPress={() => goBack()} />
     </View>
   );
 }

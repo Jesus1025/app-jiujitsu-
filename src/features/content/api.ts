@@ -106,6 +106,22 @@ export function useDeleteQuiz(academyId: string) {
   });
 }
 
+/** Respuestas correctas (solo el staff puede leerlas). */
+export function useQuizAnswerKeys(questionIds: string[], enabled: boolean) {
+  return useQuery({
+    queryKey: ['quiz-keys', ...questionIds],
+    enabled: enabled && questionIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('quiz_answer_keys')
+        .select('*')
+        .in('question_id', questionIds);
+      if (error) throw error;
+      return new Map(data.map((k) => [k.question_id, k.correct_index]));
+    },
+  });
+}
+
 export function useQuizAssignments(filter: { quizId?: string; studentIds?: string[] }) {
   return useQuery({
     queryKey: ['quiz-assignments', filter],
@@ -229,6 +245,7 @@ export function useSaveProduct(academyId: string) {
 export function useSales(academyId: string) {
   return useQuery({
     queryKey: ['sales', academyId],
+    enabled: !!academyId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('product_sales')

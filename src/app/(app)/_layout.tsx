@@ -49,11 +49,7 @@ function AppStack() {
         <Stack.Screen name="(academy)" options={{ headerShown: false }} />
       </Stack.Protected>
       <Stack.Protected guard={!hasAcademy}>
-        <Stack.Screen name="onboarding/index" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding/create-academy" options={{ title: 'Crear academia' }} />
-        <Stack.Screen name="onboarding/join" options={{ title: 'Unirme a una academia' }} />
-        <Stack.Screen name="onboarding/student-form" options={{ title: 'Ficha' }} />
-        <Stack.Screen name="onboarding/waiver" options={{ title: 'Exoneración' }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack.Protected>
     </Stack>
   );

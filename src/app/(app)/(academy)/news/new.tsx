@@ -1,7 +1,8 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 
+import { goBack } from '@/lib/navigation';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { FormError } from '@/components/ui/form-error';
@@ -40,7 +41,7 @@ export default function NewAnnouncementScreen() {
         pinned,
         show_on_website: kind === 'news' && onWebsite,
       },
-      { onSuccess: () => router.back(), onError: (e) => setError(errorMessage(e)) },
+      { onSuccess: () => goBack(), onError: (e) => setError(errorMessage(e)) },
     );
   }
 

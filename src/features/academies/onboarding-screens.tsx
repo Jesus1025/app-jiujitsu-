@@ -1,9 +1,17 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 
+import { goBack } from '@/lib/navigation';
 import { Screen } from '@/components/ui/screen';
 import { QueryState } from '@/components/ui/states';
 import type { FlowBase } from '@/features/academies/onboarding';
-import { useCreateStudent, useStudent, useUploadStudentPhoto } from '@/features/students/api';
+import {
+  type Student,
+  useCreateStudent,
+  useStudent,
+  useUpdateStudent,
+  useUploadStudentPhoto,
+} from '@/features/students/api';
 import { StudentForm } from '@/features/students/student-form';
 import { WaiverForm } from '@/features/students/waiver-form';
 import { useAuth } from '@/lib/auth';
@@ -14,7 +22,10 @@ export function PendingStudentFormScreen({ base }: { base: FlowBase }) {
   const { session } = useAuth();
   const userId = session?.user.id ?? '';
   const create = useCreateStudent();
+  const update = useUpdateStudent();
   const upload = useUploadStudentPhoto();
+  // Si la ficha se creó pero falló la foto, el reintento actualiza en vez de duplicar.
+  const [created, setCreated] = useState<Student | null>(null);
 
   return (
     <Screen safeArea="bottom">
@@ -25,12 +36,18 @@ export function PendingStudentFormScreen({ base }: { base: FlowBase }) {
         initialName={mode === 'self' ? (session?.user.user_metadata.full_name as string) : ''}
         submitLabel="Guardar y continuar"
         onSave={async (values, photoUri) => {
-          const student = await create.mutateAsync({
-            ...values,
-            academy_id: academy,
-            user_id: mode === 'self' ? userId : null,
-            guardian_user_id: mode === 'guardian' ? userId : null,
-          });
+          let student = created;
+          if (student) {
+            await update.mutateAsync({ id: student.id, values });
+          } else {
+            student = await create.mutateAsync({
+              ...values,
+              academy_id: academy,
+              user_id: mode === 'self' ? userId : null,
+              guardian_user_id: mode === 'guardian' ? userId : null,
+            });
+            setCreated(student);
+          }
           if (photoUri) await upload.mutateAsync({ student, uri: photoUri });
           const params = { student: student.id };
           if (base === 'onboarding') router.replace({ pathname: '/onboarding/waiver', params });
@@ -53,7 +70,7 @@ export function PendingWaiverScreen() {
         <WaiverForm
           student={student}
           defaultSignerName={session?.user.user_metadata.full_name as string}
-          onDone={() => router.back()}
+          onDone={() => goBack()}
         />
       ) : (
         <QueryState isLoading={isLoading} error={error} onRetry={refetch} />

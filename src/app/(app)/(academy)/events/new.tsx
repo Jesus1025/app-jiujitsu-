@@ -1,7 +1,8 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { goBack } from '@/lib/navigation';
 import { Button } from '@/components/ui/button';
 import { DateField, TimeField } from '@/components/ui/date-field';
 import { FormError } from '@/components/ui/form-error';
@@ -67,7 +68,7 @@ function EventForm({ existing }: { existing?: Tables<'events'> }) {
         price: parseAmount(price) ?? 0,
         weekly_reminder: weeklyReminder,
       },
-      { onSuccess: () => router.back(), onError: (e) => setError(errorMessage(e)) },
+      { onSuccess: () => goBack(), onError: (e) => setError(errorMessage(e)) },
     );
   }
 

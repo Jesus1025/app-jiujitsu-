@@ -509,10 +509,12 @@ select
   ) as last_class_date
 from public.students s
 left join lateral (
+  -- El grado vigente es el más reciente; si hay dos el mismo día, el más alto.
   select ra.belt_id, ra.degree, ra.awarded_at
   from public.rank_awards ra
+  join public.belts b on b.id = ra.belt_id
   where ra.student_id = s.id
-  order by ra.awarded_at desc, ra.created_at desc
+  order by ra.awarded_at desc, b.sort_order desc, ra.degree desc, ra.created_at desc
   limit 1
 ) r on true;
 
@@ -634,6 +636,12 @@ as $$
 declare
   v_belt text;
 begin
+  -- El primer cinturón (asignado al activar la ficha) no se celebra.
+  if not exists (
+    select 1 from public.rank_awards where student_id = new.student_id and id <> new.id
+  ) then
+    return new;
+  end if;
   select name into v_belt from public.belts where id = new.belt_id;
   perform public.notify_student(
     new.student_id, 'rank_award', '¡Felicitaciones!',
@@ -645,6 +653,41 @@ $$;
 
 create trigger rank_awards_notify after insert on public.rank_awards
   for each row execute function public.on_rank_award();
+
+-- Al activar una ficha sin grados, se le asigna el cinturón blanco (kids si tiene menos de 16).
+create function public.assign_initial_belt()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_belt uuid;
+begin
+  if new.status <> 'active' or exists (select 1 from public.rank_awards where student_id = new.id) then
+    return new;
+  end if;
+
+  select id into v_belt
+  from public.belts
+  where academy_id = new.academy_id
+    and track = case
+      when extract(year from age(new.joined_at, new.birth_date)) < 16 then 'kids'::public.belt_track
+      else 'adult'::public.belt_track
+    end
+  order by sort_order
+  limit 1;
+
+  if v_belt is not null then
+    insert into public.rank_awards (academy_id, student_id, belt_id, degree, awarded_at, awarded_by, notes)
+    values (new.academy_id, new.id, v_belt, 0, new.joined_at, null, 'Cinturón inicial');
+  end if;
+  return new;
+end;
+$$;
+
+create trigger students_initial_belt after insert or update of status on public.students
+  for each row execute function public.assign_initial_belt();
 
 -- ---------------------------------------------------------------------------
 -- Plantilla por defecto: se agrega exoneración y un plan mensual
@@ -899,8 +942,10 @@ begin
   where cs.academy_id = p_academy
     and cs.active
     and cs.weekday = extract(dow from v_local)::int
-    and v_local::time between cs.start_time - interval '30 minutes' and cs.end_time
-  order by abs(extract(epoch from (v_local::time - cs.start_time)))
+    -- Con fecha completa para que "30 minutos antes" no se dé vuelta a medianoche.
+    and v_local between (v_local::date + cs.start_time) - interval '30 minutes'
+                    and (v_local::date + cs.end_time)
+  order by abs(extract(epoch from (v_local - (v_local::date + cs.start_time))))
   limit 1;
 
   if v_schedule.id is null then
@@ -1255,6 +1300,7 @@ revoke execute on function public.check_in_at(uuid, text, uuid, text, timestampt
 revoke execute on function public.queue_payment_reminders() from public, anon, authenticated;
 revoke execute on function public.on_membership_change() from public, anon, authenticated;
 revoke execute on function public.on_rank_award() from public, anon, authenticated;
+revoke execute on function public.assign_initial_belt() from public, anon, authenticated;
 
 revoke execute on function public.link_student_account(uuid, uuid) from public, anon;
 revoke execute on function public.rotate_checkin_code(uuid) from public, anon;

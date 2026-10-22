@@ -1,7 +1,8 @@
 import { Stack } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { Alert } from '@/lib/alert';
 import { BeltBadge } from '@/components/belt-badge';
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
