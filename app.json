@@ -13,7 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#1F4E9C",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -30,13 +30,33 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#1F4E9C",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
       ],
       "expo-sharing",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "La app usa la cámara para escanear el QR de asistencia y tomar la foto de la ficha.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "La app usa tus fotos para la foto de la ficha del alumno.",
+          "cameraPermission": "La app usa la cámara para tomar la foto de la ficha del alumno."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#1F4E9C"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

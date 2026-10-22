@@ -498,37 +498,37 @@ disponibilidad real.
 
 ### Fase 1 — MVP para el piloto (6–8 semanas)
 - [x] Crear academia, código de invitación, aprobar solicitudes, roles.
-- [ ] Ficha del alumno completa con foto y categoría automática.
-- [ ] Registro de menores por apoderado.
-- [ ] Exoneración con firma y PDF.
-- [ ] Cinturones (plantilla Jiu-Jitsu) e historial de grados.
-- [ ] Horario de clases y sesiones.
-- [ ] Asistencia manual + check-in con QR + atrasos.
-- [ ] Planes, mensualidades automáticas, pagos manuales, vista de morosos.
-- [ ] Notificaciones push: solicitudes y recordatorios de pago.
-- [ ] Exportar ficha a PDF y lista de alumnos a CSV.
-- [ ] Baja de alumnos con historial.
+- [x] Ficha del alumno completa con foto y categoría automática.
+- [x] Registro de menores por apoderado.
+- [x] Exoneración con firma y PDF.
+- [x] Cinturones (plantilla Jiu-Jitsu) e historial de grados (blanco inicial automático).
+- [x] Horario de clases y sesiones.
+- [x] Asistencia manual + check-in con QR + atrasos.
+- [x] Planes, mensualidades automáticas, pagos manuales, vista de morosos.
+- [x] Notificaciones push: solicitudes y recordatorios de pago (falta configurar EAS y Vault, ver README).
+- [x] Exportar ficha a PDF y lista de alumnos a CSV.
+- [x] Baja de alumnos con historial.
 - [ ] **Piloto**: cargar a todos los alumnos de la academia y usarla 1 mes.
 
 ### Fase 2 — Comunicación y progreso (4–6 semanas)
-- [ ] Programa de graduación con requisitos y barra de progreso.
-- [ ] Calendario de eventos con recordatorios semanales y eventos con cobro.
-- [ ] Noticias / anuncios y técnica de la semana.
-- [ ] Documentos (reglamento, manuales).
-- [ ] Ranking de asistencia.
-- [ ] Promociones y referidos.
-- [ ] Panel con métricas para el profesor.
-- [ ] Check-in con sticker NFC.
-- [ ] Personalización de la academia (logo, colores).
+- [x] Programa de graduación con requisitos y barra de progreso.
+- [x] Calendario de eventos con recordatorios semanales y eventos con cobro.
+- [x] Noticias / anuncios y técnica de la semana.
+- [x] Documentos (reglamento, manuales).
+- [x] Ranking de asistencia.
+- [x] Promociones y referidos.
+- [x] Panel con métricas para el profesor.
+- [x] Check-in con sticker NFC (enlace appjiujitsu://checkin).
+- [ ] Personalización de la academia (logo, colores). Hoy: nombre, tolerancia y nombre web.
 - [ ] Publicar en **Google Play** (prueba cerrada → producción).
 
 ### Fase 3 — Premium y contenido (6–10 semanas)
-- [ ] Pasarela de pago (Flow o Mercado Pago) con webhooks.
-- [ ] Tests / pruebas con nota y envío automático a los X meses.
-- [ ] Cursos en video (Mux) con compra.
-- [ ] Muro / testimonios.
-- [ ] Inventario y ventas de productos.
-- [ ] Noticias visibles en la página web de la academia (API pública de solo lectura).
+- [ ] Pasarela de pago (Flow o Mercado Pago) con webhooks. Requiere cuenta y estar al día con el SII.
+- [x] Tests / pruebas con nota y envío automático a los X meses.
+- [x] Cursos en video con acceso otorgado por el profesor (URL MP4/HLS; Mux u otro proveedor es opcional).
+- [x] Muro / testimonios.
+- [x] Inventario y ventas de productos.
+- [x] Noticias visibles en la página web de la academia (ver docs/WEB_NOTICIAS.md).
 
 ### Fase 4 — SaaS para otras academias
 - [ ] Alta autónoma de academias y asistente de configuración inicial.
@@ -543,51 +543,35 @@ disponibilidad real.
 ## 12. Estructura del repositorio
 
 ```
-app-jiujitsu-/
-├── src/
-│   ├── app/                  # Pantallas (Expo Router): cada archivo es una ruta
-│   │   ├── _layout.tsx       # proveedores + rutas protegidas según la sesión
-│   │   ├── sign-in.tsx, sign-up.tsx, verify-email.tsx, forgot-password.tsx
-│   │   └── (app)/            # requiere sesión
-│   │       ├── _layout.tsx   # sin academia activa → onboarding
-│   │       ├── index.tsx     # inicio (staff: código + solicitudes)
-│   │       └── onboarding/   # crear academia / unirse con código
-│   ├── components/           # UI reutilizable (components/ui: botón, campo, tarjeta…)
-│   ├── constants/theme.ts    # colores, espaciados, tipografía
-│   ├── features/             # lógica por módulo (academies, auth; luego students, attendance…)
-│   ├── hooks/
-│   ├── lib/                  # cliente Supabase, sesión, errores
-│   └── types/database.ts     # tipos de la base de datos
-├── supabase/
-│   ├── migrations/           # SQL versionado (tablas, RLS, funciones)
-│   ├── tests/database/       # tests de RLS (pgTAP)
-│   ├── templates/            # correos con código de 6 dígitos
-│   ├── seed.sql
-│   └── config.toml
-├── .github/workflows/ci.yml
-├── docs/PLAN.md              # este documento
-├── app.json / eas.json
-└── package.json
+src/app/
+├── _layout.tsx, sign-in, sign-up, verify-email, forgot-password   (sin sesión)
+└── (app)/                          (con sesión)
+    ├── onboarding/                 sin academia activa: unirse, crear, ficha, exoneración
+    └── (academy)/                  con academia activa
+        ├── (tabs)/                 Inicio, Alumnos, Clases, Progreso, Calendario, Pagos, Más
+        ├── students/               nuevo, ficha, editar, exoneración, otorgar grado
+        ├── classes/                horario, sesión (asistencia), QR
+        ├── payments/               cobro, nuevo cobro, planes, referidos
+        ├── events/, news/, quizzes/, courses/, store/, graduation/, settings/
+        └── checkin, documents, ranking, wall, members, notifications, profile
+src/features/      datos por módulo (academies, students, classes, payments, community, content…)
+src/components/    UI reutilizable (ui/*, cinturón, firma, foto)
+src/lib/           Supabase, sesión, formatos, archivos, RUT, alertas, navegación
+supabase/          migraciones, pruebas pgTAP, Edge Function send-push, plantillas de correo
 ```
-
-A medida que crezca, las pantallas del staff y de los alumnos se agruparán en
-`src/app/(app)/(staff)/` y `src/app/(app)/(member)/`.
 
 ---
 
-## 13. Primeros pasos para empezar a programar
+## 13. Cómo se probó
 
-Las instrucciones para instalar y correr el proyecto están en el [README](../README.md).
-
-Ya está hecho:
-1. `academies`, `profiles`, `memberships` + función `has_role` + políticas RLS.
-2. `categories` y `belts` con la plantilla de Jiu-Jitsu (se crean al crear la academia).
-3. Tests de RLS: un usuario de la academia A no ve nada de la academia B.
-4. Flujo de punta a punta: **crear academia → compartir código → alumno solicita unirse →
-   profesor aprueba**.
-
-Siguiente paso (Fase 1): tabla `students` con la ficha completa y la foto, para que el
-alumno la complete al solicitar el ingreso y el profesor la vea antes de aprobar.
+- **113+ pruebas de base de datos (pgTAP)**: aislamiento entre academias, permisos por rol,
+  asistencia (incluida la medianoche), cobros con descuentos, pruebas con nota, tienda, cursos.
+- **CI**: además de tipos/lint/formato, compila la app contra los tipos generados desde la
+  base real de Supabase.
+- **Pruebas de punta a punta** en la versión web (Supabase local con GoTrue + PostgREST):
+  profesor crea academia, carga alumno, otorga grado, horario, asistencia, cobro y pago,
+  noticia; alumna se registra, completa ficha con foto, firma, es aprobada, marca asistencia
+  con el enlace del QR; requisitos, eventos, pruebas, tienda, cursos, muro, documentos.
 
 ---
 
