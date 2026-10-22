@@ -60,14 +60,12 @@ async function registerToken(userId: string) {
   if (status !== 'granted') return;
 
   const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
-  await supabase
-    .from('push_tokens')
-    .upsert({
-      token,
-      user_id: userId,
-      platform: Platform.OS,
-      updated_at: new Date().toISOString(),
-    });
+  await supabase.from('push_tokens').upsert({
+    token,
+    user_id: userId,
+    platform: Platform.OS,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 /** Registra el teléfono para recibir push y abre la pantalla correcta al tocar una notificación. */

@@ -62,7 +62,8 @@ export async function exportStudentsCsv(args: {
   });
 
   // BOM para que Excel reconozca las tildes (UTF-8).
-  const content = '﻿' + [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');
+  const content =
+    '\uFEFF' + [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');
   const safeName = args.academyName.replace(/[^\w]+/g, '-').toLowerCase();
   await shareTextFile(`alumnos-${safeName}-${args.today}.csv`, content, 'text/csv');
 }
