@@ -1,0 +1,3 @@
+-- Datos para desarrollo local (se cargan con `npx supabase db reset`).
+-- Las categorías y cinturones por defecto se crean al llamar a create_academy(),
+-- así que aquí no hace falta insertarlos.

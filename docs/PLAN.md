@@ -488,15 +488,16 @@ Las duraciones son estimaciones para **una persona a tiempo parcial**; ajustar s
 disponibilidad real.
 
 ### Fase 0 — Preparación (1–2 semanas)
-- [ ] Crear proyecto Expo con TypeScript, Expo Router, ESLint y Prettier.
-- [ ] Crear proyectos Supabase **dev** y **prod**; CLI de Supabase con migraciones en el repo.
-- [ ] Autenticación básica y pantalla de inicio.
-- [ ] Diseño base: paleta, tipografía, componentes (botón, input, tarjeta, lista).
-- [ ] CI en GitHub Actions: lint + typecheck + tests de base de datos.
-- [ ] Build de prueba en un Android real con EAS.
+- [x] Crear proyecto Expo con TypeScript, Expo Router, ESLint y Prettier.
+- [x] CLI de Supabase con migraciones, pruebas y plantillas de correo en el repo.
+- [ ] Crear proyectos Supabase **dev** y **prod** (requiere la cuenta del dueño del proyecto).
+- [x] Autenticación: registro con código por correo, inicio de sesión, recuperar contraseña.
+- [x] Diseño base: paleta, tipografía, componentes (botón, campo, tarjeta, pantalla).
+- [x] CI en GitHub Actions: lint + typecheck + formato + tests de base de datos.
+- [ ] Build de prueba en un Android real con EAS (requiere cuenta de Expo).
 
 ### Fase 1 — MVP para el piloto (6–8 semanas)
-- [ ] Crear academia, código de invitación, aprobar solicitudes, roles.
+- [x] Crear academia, código de invitación, aprobar solicitudes, roles.
 - [ ] Ficha del alumno completa con foto y categoría automática.
 - [ ] Registro de menores por apoderado.
 - [ ] Exoneración con firma y PDF.
@@ -543,66 +544,50 @@ disponibilidad real.
 
 ```
 app-jiujitsu-/
-├── app/                      # Pantallas (Expo Router)
-│   ├── (auth)/               # login, registro, recuperar contraseña
-│   ├── (staff)/              # dueño e instructores
-│   │   ├── index.tsx         # panel
-│   │   ├── students/
-│   │   ├── attendance/
-│   │   ├── payments/
-│   │   ├── graduation/
-│   │   └── settings/
-│   ├── (member)/             # alumno y apoderado
-│   └── checkin.tsx           # destino del QR / NFC
 ├── src/
-│   ├── components/           # UI reutilizable
-│   ├── features/             # lógica por módulo (students, attendance, payments…)
-│   ├── lib/                  # cliente Supabase, utilidades, fechas
-│   └── types/                # tipos generados de la base de datos
+│   ├── app/                  # Pantallas (Expo Router): cada archivo es una ruta
+│   │   ├── _layout.tsx       # proveedores + rutas protegidas según la sesión
+│   │   ├── sign-in.tsx, sign-up.tsx, verify-email.tsx, forgot-password.tsx
+│   │   └── (app)/            # requiere sesión
+│   │       ├── _layout.tsx   # sin academia activa → onboarding
+│   │       ├── index.tsx     # inicio (staff: código + solicitudes)
+│   │       └── onboarding/   # crear academia / unirse con código
+│   ├── components/           # UI reutilizable (components/ui: botón, campo, tarjeta…)
+│   ├── constants/theme.ts    # colores, espaciados, tipografía
+│   ├── features/             # lógica por módulo (academies, auth; luego students, attendance…)
+│   ├── hooks/
+│   ├── lib/                  # cliente Supabase, sesión, errores
+│   └── types/database.ts     # tipos de la base de datos
 ├── supabase/
-│   ├── migrations/           # SQL versionado (tablas, RLS, vistas)
-│   ├── functions/            # Edge Functions (notificaciones, PDFs, cobros)
-│   ├── tests/                # tests de RLS (pgTAP)
-│   └── seed.sql              # academia de prueba, cinturones, categorías
-├── docs/
-│   └── PLAN.md               # este documento
+│   ├── migrations/           # SQL versionado (tablas, RLS, funciones)
+│   ├── tests/database/       # tests de RLS (pgTAP)
+│   ├── templates/            # correos con código de 6 dígitos
+│   ├── seed.sql
+│   └── config.toml
+├── .github/workflows/ci.yml
+├── docs/PLAN.md              # este documento
 ├── app.json / eas.json
 └── package.json
 ```
+
+A medida que crezca, las pantallas del staff y de los alumnos se agruparán en
+`src/app/(app)/(staff)/` y `src/app/(app)/(member)/`.
 
 ---
 
 ## 13. Primeros pasos para empezar a programar
 
-```bash
-# 1. Proyecto Expo
-npx create-expo-app@latest . --template default
-npx expo install expo-router expo-camera expo-notifications expo-print \
-  expo-image-picker expo-secure-store @supabase/supabase-js
-npm i @tanstack/react-query react-hook-form zod
+Las instrucciones para instalar y correr el proyecto están en el [README](../README.md).
 
-# 2. Supabase local
-npm i -D supabase
-npx supabase init
-npx supabase start            # levanta Postgres, Auth y Storage locales (requiere Docker)
-npx supabase migration new init_core
-
-# 3. Tipos de la base de datos para TypeScript
-npx supabase gen types typescript --local > src/types/database.ts
-
-# 4. Correr la app
-npx expo start
-```
-
-Orden sugerido de la primera migración:
+Ya está hecho:
 1. `academies`, `profiles`, `memberships` + función `has_role` + políticas RLS.
-2. `categories`, `belts`, `students`, `rank_awards`.
-3. Seed con la plantilla de Jiu-Jitsu (cinturones adulto y kids, categorías del profesor).
-4. Tests de RLS: usuario de la academia A no ve nada de la academia B.
+2. `categories` y `belts` con la plantilla de Jiu-Jitsu (se crean al crear la academia).
+3. Tests de RLS: un usuario de la academia A no ve nada de la academia B.
+4. Flujo de punta a punta: **crear academia → compartir código → alumno solicita unirse →
+   profesor aprueba**.
 
-Primera pantalla útil de punta a punta: **crear academia → invitar alumno → alumno completa
-ficha → profesor aprueba → aparece en la lista**. Con eso funcionando, el resto se construye
-encima.
+Siguiente paso (Fase 1): tabla `students` con la ficha completa y la foto, para que el
+alumno la complete al solicitar el ingreso y el profesor la vea antes de aprobar.
 
 ---
 
