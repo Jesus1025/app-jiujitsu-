@@ -519,7 +519,7 @@ disponibilidad real.
 - [x] Promociones y referidos.
 - [x] Panel con métricas para el profesor.
 - [x] Check-in con sticker NFC (enlace appjiujitsu://checkin).
-- [ ] Personalización de la academia (logo, colores). Hoy: nombre, tolerancia y nombre web.
+- [x] Personalización de la academia: logo, color principal, cinturones y reglas propias.
 - [ ] Publicar en **Google Play** (prueba cerrada → producción).
 
 ### Fase 3 — Premium y contenido (6–10 semanas)
@@ -575,32 +575,30 @@ supabase/          migraciones, pruebas pgTAP, Edge Function send-push, plantill
 
 ---
 
-## 14. Preguntas abiertas para el profesor
+## 14. Configuración por academia (antes: preguntas para el profesor)
 
-**Alumnos y fichas**
-1. ¿Qué datos exactos quiere en la ficha? ¿Necesita RUT? ¿Previsión de salud, alergias, lesiones?
-2. ¿Puede compartir el texto actual de la carta de exoneración?
-3. ¿Los alumnos pueden ver a otros alumnos (ranking con nombres) o solo su propia info?
+Cada academia responde estas preguntas en **Más → Ajustes de la academia**, sin tocar código:
 
-**Cinturones y graduación**
-4. ¿Usa el sistema de cinturones IBJJF (adulto y kids) o tiene variaciones?
-5. ¿Cuáles son los requisitos de su programa de graduación (clases, meses, técnicas)?
-6. ¿"Mi profe" debe poder otorgar grados en su academia?
+| Pregunta | Dónde se configura |
+|---|---|
+| Valores de matrícula y mensualidad, planes | Planes y valores · Reglas → matrícula automática al aprobar |
+| Día de vencimiento y días de gracia | Planes (día) · Reglas → días de gracia |
+| Promo de referidos | Reglas → descuento sugerido (se ajusta en cada referido) |
+| Sistema de cinturones y edad para pasar a adulto | Cinturones y grados · Reglas → edad de adulto |
+| Requisitos de graduación | Requisitos de graduación |
+| ¿Los instructores otorgan grados? | Reglas → interruptor |
+| ¿Los alumnos ven el ranking? | Reglas → interruptor |
+| Datos obligatorios de la ficha (foto, RUT, emergencia) | Reglas → interruptores |
+| Texto de la exoneración | Texto de la exoneración (con versiones) |
+| Tolerancia de atraso y ventana del QR | General → tolerancia · Reglas → minutos antes |
+| Categorías por edad | Categorías por edad |
+| Logo y color | Logo y color |
+| Horario, reglamento y manuales | Horario de clases · Documentos |
 
-**Pagos**
-7. Valores de matrícula y mensualidad por categoría. ¿Hay planes (2 veces por semana, libre, familiar)?
-8. ¿Qué día del mes vence la mensualidad? ¿Hay días de gracia?
-9. ¿Cómo funciona exactamente la promo de referidos (una vez, todos los meses, tope)?
-
-**Operación**
-10. ¿Cuántos alumnos tiene hoy y cuántos son menores?
-11. ¿Los alumnos usan más Android o iPhone? (define si publicar iOS pronto)
-12. ¿Puede compartir el Excel de horarios, el reglamento y el manual del alumno nuevo?
-13. Tolerancia para marcar atraso (¿5, 10 minutos?).
-
-**Negocio**
-14. ¿Conoce otras academias interesadas para un segundo piloto?
-15. ¿Qué apps vio en TikTok que le gustaron? (para tomar ideas)
+Las reglas se guardan en `academies.settings` y la base de datos las aplica (días de gracia,
+matrícula, ventana del QR, edad de adulto, quién otorga grados, ranking). Lo único que sigue
+siendo una conversación con cada profesor son datos del negocio (cuántos alumnos tiene, si
+usan más Android o iPhone, otras academias interesadas).
 
 ---
 

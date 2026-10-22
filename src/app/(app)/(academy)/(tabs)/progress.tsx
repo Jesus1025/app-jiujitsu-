@@ -60,7 +60,7 @@ export default function ProgressScreen() {
 }
 
 function StudentProgress({ student }: { student: Student }) {
-  const { academy } = useAcademy();
+  const { academy, settings } = useAcademy();
   const today = todayIn(academy.timezone);
   const { data: progressMap } = useStudentProgressList(academy.id);
   const { data: belts } = useBelts(academy.id);
@@ -72,7 +72,11 @@ function StudentProgress({ student }: { student: Student }) {
 
   const progress = progressMap?.get(student.id);
   const belt = belts?.find((b) => b.id === progress?.belt_id);
-  const step = nextStep(progress, belts, beltTrackFor(student.birth_date, today));
+  const step = nextStep(
+    progress,
+    belts,
+    beltTrackFor(student.birth_date, today, settings.adult_belt_age),
+  );
   const status = requirementStatus(step, requirements, progress, student.joined_at, today);
   const position = ranking?.find((r) => r.student_id === student.id);
 
@@ -92,10 +96,12 @@ function StudentProgress({ student }: { student: Student }) {
         <Stat label="Entrenando" value={trainingTime(student.joined_at, today)} />
         <Stat label="Clases totales" value={progress?.total_classes ?? 0} />
         <Stat label="Desde el último grado" value={progress?.classes_since_award ?? 0} />
-        <Stat
-          label="Puesto este mes"
-          value={position ? `#${position.rank} (${position.classes})` : '—'}
-        />
+        {settings.show_ranking_to_students ? (
+          <Stat
+            label="Puesto este mes"
+            value={position ? `#${position.rank} (${position.classes})` : '—'}
+          />
+        ) : null}
       </StatGrid>
 
       {step ? (

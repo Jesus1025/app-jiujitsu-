@@ -24,9 +24,9 @@ export function categoryFor(birthDate: string, categories: Category[] | undefine
   return categories?.find((c) => age >= c.min_age && (c.max_age === null || age <= c.max_age));
 }
 
-/** Los menores de 16 usan el sistema de cinturones kids (IBJJF). */
-export function beltTrackFor(birthDate: string, today: string) {
-  return ageOn(birthDate, today) < 16 ? 'kids' : 'adult';
+/** Bajo la edad de adulto (16 en IBJJF, configurable por academia) se usan cinturones kids. */
+export function beltTrackFor(birthDate: string, today: string, adultAge = 16) {
+  return ageOn(birthDate, today) < adultAge ? 'kids' : 'adult';
 }
 
 export function trainingTime(joinedAt: string, today: string) {

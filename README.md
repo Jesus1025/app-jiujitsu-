@@ -20,6 +20,9 @@ El plan del producto, la hoja de ruta y cómo se probó están en [docs/PLAN.md]
 - Pagos: planes y valores, mensualidades del mes (automáticas el día 1), cobros manuales,
   registrar pagos, morosos, descuento por referido.
 - Graduación: requisitos por cinturón/grado y lista de candidatos.
+- Ajustes propios de cada academia: logo y color, cinturones y grados, categorías, texto de
+  la exoneración, días de gracia, matrícula automática, ventana del QR, quién otorga grados,
+  si los alumnos ven el ranking y qué datos son obligatorios en la ficha.
 - Eventos con inscripción y cobro, noticias y técnica de la semana (también en la web),
   documentos, pruebas con nota 1,0–7,0, tienda con inventario, cursos en video, muro.
 
@@ -111,8 +114,8 @@ Ver [docs/WEB_NOTICIAS.md](docs/WEB_NOTICIAS.md).
   en regla con el SII. Hoy los pagos se registran a mano (efectivo, transferencia, tarjeta).
 - **Venta de cursos dentro de la app**: Apple y Google exigen su sistema de pagos para
   contenido digital. Hoy el profesor da acceso y el cobro queda en Pagos.
-- Logo y colores propios por academia, publicación en App Store y la revisión legal
-  (términos, privacidad y la ley de datos personales).
+- Publicación en App Store y la revisión legal (términos, privacidad y la ley de datos
+  personales).
 
 ## Comandos útiles
 

@@ -8,6 +8,7 @@ import {
   pickActiveMembership,
   useMyMemberships,
 } from '@/features/academies/api';
+import { type AcademySettings, parseSettings } from '@/features/academies/settings';
 
 const STORAGE_KEY = 'active-academy-id';
 
@@ -17,6 +18,8 @@ type ActiveAcademyState = {
   role: MemberRole;
   isStaff: boolean;
   isOwner: boolean;
+  /** Reglas de la academia, con sus valores por defecto. */
+  settings: AcademySettings;
   /** Membresías activas (para cambiar de academia). */
   memberships: MyMembership[];
   setActiveAcademy: (academyId: string) => void;
@@ -50,6 +53,7 @@ export function ActiveAcademyProvider({ children }: PropsWithChildren) {
           role: membership.role,
           isStaff: membership.role === 'owner' || membership.role === 'instructor',
           isOwner: membership.role === 'owner',
+          settings: parseSettings(membership.academy.settings),
           memberships: (data ?? []).filter((m) => m.status === 'active'),
           setActiveAcademy,
         }

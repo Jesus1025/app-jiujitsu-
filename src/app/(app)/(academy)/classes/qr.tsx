@@ -16,7 +16,7 @@ import { errorMessage } from '@/lib/errors';
 
 /** QR para que los alumnos marquen asistencia. Se puede imprimir o mostrar en una tablet. */
 export default function CheckinQrScreen() {
-  const { academy } = useAcademy();
+  const { academy, settings } = useAcademy();
   const { data: code, isLoading, error, refetch } = useCheckinCode(academy.id);
   const rotate = useRotateCheckinCode(academy.id);
 
@@ -50,8 +50,9 @@ export default function CheckinQrScreen() {
             Los alumnos lo escanean desde la app ({'"'}Marcar asistencia{'"'}) al llegar a clases.
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={styles.center}>
-            Funciona desde 30 minutos antes de cada clase hasta que termina. Si llegan después de la
-            tolerancia ({academy.late_tolerance_minutes} min), queda como atraso.
+            Funciona desde {settings.checkin_window_minutes} minutos antes de cada clase hasta que
+            termina. Si llegan después de la tolerancia ({academy.late_tolerance_minutes} min),
+            queda como atraso.
           </ThemedText>
 
           <Section title="Sticker NFC (opcional)">

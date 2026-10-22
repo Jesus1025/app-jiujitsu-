@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import type { ComponentProps } from 'react';
 import type { ColorValue } from 'react-native';
 
+import { AcademyTitle } from '@/components/academy-logo';
 import { useAcademy } from '@/features/academies/active-academy';
 import { useNotifications } from '@/features/community/api';
 import { useTheme } from '@/hooks/use-theme';
@@ -18,7 +19,7 @@ function icon(name: IconName) {
 /** Pestañas distintas para el staff (gestión) y para alumnos/apoderados. */
 export default function TabsLayout() {
   const theme = useTheme();
-  const { isStaff, academy } = useAcademy();
+  const { isStaff } = useAcademy();
   const { data: notifications } = useNotifications();
   const unread = (notifications ?? []).filter((n) => !n.read_at).length;
   const staffOnly = isStaff ? undefined : null;
@@ -32,7 +33,11 @@ export default function TabsLayout() {
       }}>
       <Tabs.Screen
         name="index"
-        options={{ title: 'Inicio', headerTitle: academy.name, tabBarIcon: icon('home-outline') }}
+        options={{
+          title: 'Inicio',
+          headerTitle: () => <AcademyTitle />,
+          tabBarIcon: icon('home-outline'),
+        }}
       />
       <Tabs.Screen
         name="students"

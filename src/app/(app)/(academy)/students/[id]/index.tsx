@@ -50,7 +50,8 @@ import { ageOn, formatDate, formatGrade, formatMoney, fullName, todayIn } from '
 
 export default function StudentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { academy, isStaff, isOwner } = useAcademy();
+  const { academy, isStaff, isOwner, settings } = useAcademy();
+  const canAward = isOwner || (isStaff && settings.instructors_can_award_ranks);
   const studentQuery = useStudent(id);
   const student = studentQuery.data;
   const { data: progressMap } = useStudentProgressList(academy.id);
@@ -88,7 +89,11 @@ export default function StudentDetailScreen() {
   const progress = progressMap?.get(student.id);
   const belt = belts?.find((b) => b.id === progress?.belt_id);
   const category = categoryFor(student.birth_date, categories, today);
-  const step = nextStep(progress, belts, beltTrackFor(student.birth_date, today));
+  const step = nextStep(
+    progress,
+    belts,
+    beltTrackFor(student.birth_date, today, settings.adult_belt_age),
+  );
   const status = requirementStatus(step, requirements, progress, student.joined_at, today);
   const signature = signatures?.[0];
   const pendingCharges = (charges ?? []).filter((c) => c.status === 'pending');
@@ -198,7 +203,7 @@ export default function StudentDetailScreen() {
         <View style={styles.action}>
           <Button title="PDF" variant="secondary" onPress={handleExport} loading={exporting} />
         </View>
-        {isStaff ? (
+        {canAward ? (
           <View style={styles.action}>
             <Button
               title="Otorgar grado"
@@ -302,7 +307,7 @@ export default function StudentDetailScreen() {
                 title={`${rankBelt?.name ?? 'Cinturón'}${rank.degree ? ` · ${rank.degree}° grado` : ''}`}
                 subtitle={[formatDate(rank.awarded_at), rank.notes].filter(Boolean).join(' · ')}
                 right={
-                  isStaff ? (
+                  canAward ? (
                     <Button
                       title="Quitar"
                       variant="ghost"

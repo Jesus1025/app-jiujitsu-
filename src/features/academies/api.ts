@@ -15,7 +15,7 @@ export const roleLabels: Record<MemberRole, string> = {
 
 // Columnas visibles de academies (checkin_code está oculto: ver migración hide_checkin_code).
 const academyColumns =
-  'id, name, join_code, timezone, primary_color, late_tolerance_minutes, public_slug, logo_path, plan';
+  'id, name, join_code, timezone, primary_color, late_tolerance_minutes, public_slug, logo_path, plan, settings';
 
 /** Membresías del usuario actual (pendientes y activas) con los datos de su academia. */
 export function useMyMemberships() {
@@ -215,6 +215,37 @@ export function useBelts(academyId: string) {
       if (error) throw error;
       return data;
     },
+  });
+}
+
+export function useSaveBelt(academyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (values: TablesInsert<'belts'> & { id?: string }) => {
+      const { id, ...rest } = values;
+      const { error } = id
+        ? await supabase.from('belts').update(rest).eq('id', id)
+        : await supabase.from('belts').insert(rest);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['belts', academyId] }),
+  });
+}
+
+export function useDeleteBelt(academyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('belts').delete().eq('id', id);
+      if (error) {
+        // 23503: hay grados otorgados con este cinturón (la base de datos lo protege).
+        if (error.code === '23503') {
+          throw new Error('Hay alumnos con este cinturón en su historial; no se puede eliminar.');
+        }
+        throw error;
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['belts', academyId] }),
   });
 }
 

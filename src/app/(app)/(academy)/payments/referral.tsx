@@ -6,8 +6,8 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { FormError } from '@/components/ui/form-error';
 import { Screen } from '@/components/ui/screen';
-import { Segmented } from '@/components/ui/segmented';
 import { Select } from '@/components/ui/select';
+import { TextField } from '@/components/ui/text-field';
 import { useAcademy } from '@/features/academies/active-academy';
 import { useRegisterReferral } from '@/features/payments/api';
 import { useStudents } from '@/features/students/api';
@@ -16,12 +16,12 @@ import { fullName } from '@/lib/format';
 
 /** "Trae a un amigo": el alumno que trajo a otro recibe un descuento en su próxima mensualidad. */
 export default function ReferralScreen() {
-  const { academy } = useAcademy();
+  const { academy, settings } = useAcademy();
   const { data: students } = useStudents(academy.id);
   const register = useRegisterReferral();
   const [referrerId, setReferrerId] = useState<string | null>(null);
   const [referredId, setReferredId] = useState<string | null>(null);
-  const [percent, setPercent] = useState('50');
+  const [percent, setPercent] = useState(String(settings.referral_percent));
   const [error, setError] = useState<string | null>(null);
 
   const options = (students ?? [])
@@ -31,9 +31,13 @@ export default function ReferralScreen() {
   function handleSave() {
     if (!referrerId || !referredId) return setError('Elige a ambos alumnos.');
     if (referrerId === referredId) return setError('Deben ser alumnos distintos.');
+    const value = Number(percent);
+    if (!Number.isInteger(value) || value < 1 || value > 100) {
+      return setError('El descuento debe estar entre 1 y 100 %.');
+    }
     setError(null);
     register.mutate(
-      { referrerId, referredId, percent: Number(percent) },
+      { referrerId, referredId, percent: value },
       { onSuccess: () => goBack(), onError: (e) => setError(errorMessage(e)) },
     );
   }
@@ -59,14 +63,11 @@ export default function ReferralScreen() {
         options={options}
         searchable
       />
-      <Segmented
+      <TextField
+        label="Descuento para quien trajo al alumno (%)"
         value={percent}
-        onChange={setPercent}
-        options={[
-          { value: '25', label: '25 %' },
-          { value: '50', label: '50 %' },
-          { value: '100', label: '100 %' },
-        ]}
+        onChangeText={setPercent}
+        keyboardType="number-pad"
       />
       <FormError message={error} />
       <Button title="Registrar" onPress={handleSave} loading={register.isPending} />

@@ -24,14 +24,16 @@ import { fullName, todayIn } from '@/lib/format';
 /** Otorgar cinturón o grado: propone el siguiente paso según el grado actual. */
 export default function AwardRankScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { academy } = useAcademy();
+  const { academy, settings } = useAcademy();
   const { data: student, isLoading, error, refetch } = useStudent(id);
   const { data: belts } = useBelts(academy.id);
   const { data: progressMap } = useStudentProgressList(academy.id);
   const award = useAwardRank();
   const today = todayIn(academy.timezone);
 
-  const defaultTrack = student ? beltTrackFor(student.birth_date, today) : 'adult';
+  const defaultTrack = student
+    ? beltTrackFor(student.birth_date, today, settings.adult_belt_age)
+    : 'adult';
   const suggested = student ? nextStep(progressMap?.get(student.id), belts, defaultTrack) : null;
 
   const [track, setTrack] = useState<'adult' | 'kids' | null>(null);

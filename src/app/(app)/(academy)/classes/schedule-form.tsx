@@ -46,7 +46,7 @@ export default function ScheduleFormScreen() {
 }
 
 function ScheduleForm({ id, existing }: { id?: string; existing?: ClassSchedule }) {
-  const { academy } = useAcademy();
+  const { academy, settings } = useAcademy();
   const { data: categories } = useCategories(academy.id);
   const { data: members } = useMembers(academy.id);
   const save = useSaveSchedule(academy.id);
@@ -153,8 +153,8 @@ function ScheduleForm({ id, existing }: { id?: string; existing?: ClassSchedule 
         onChange={setActive}
       />
       <ThemedText type="small" themeColor="textSecondary">
-        Los alumnos pueden marcar asistencia con el QR desde 30 minutos antes del inicio hasta el
-        término de la clase.
+        Los alumnos pueden marcar asistencia con el QR desde {settings.checkin_window_minutes}{' '}
+        minutos antes del inicio hasta el término de la clase.
       </ThemedText>
       <FormError message={error} />
       <Button title="Guardar" onPress={handleSave} loading={save.isPending} />

@@ -10,6 +10,7 @@ import { Segmented } from '@/components/ui/segmented';
 import { Select } from '@/components/ui/select';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
+import { useAcademySettings } from '@/features/academies/settings';
 import { useFeePlans } from '@/features/payments/api';
 import type { Student } from '@/features/students/api';
 import { genderOptions } from '@/features/students/helpers';
@@ -76,8 +77,13 @@ export function StudentForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const { data: plans } = useFeePlans(academyId);
+  const settings = useAcademySettings(academyId);
 
-  const photoRequired = mode !== 'staff' && !initial?.photo_path;
+  // El profesor puede cargar fichas incompletas; alumnos y apoderados siguen las reglas de la academia.
+  const strict = mode !== 'staff';
+  const photoRequired = strict && settings.require_photo && !initial?.photo_path;
+  const rutRequired = strict && settings.require_rut;
+  const emergencyRequired = strict && settings.require_emergency_contact;
 
   async function handleSave() {
     const nextErrors: Record<string, string> = {};
@@ -85,10 +91,11 @@ export function StudentForm({
     if (!lastName.trim()) nextErrors.lastName = 'Ingresa el apellido.';
     if (!birthDate) nextErrors.birthDate = 'Ingresa la fecha de nacimiento.';
     if (rut.trim() && !isValidRut(rut)) nextErrors.rut = 'El RUT no es válido.';
-    if (!emergencyName.trim() && mode !== 'staff') {
+    if (rutRequired && !rut.trim()) nextErrors.rut = 'Ingresa el RUT.';
+    if (!emergencyName.trim() && emergencyRequired) {
       nextErrors.emergencyName = 'Indica un contacto de emergencia.';
     }
-    if (!emergencyPhone.trim() && mode !== 'staff') {
+    if (!emergencyPhone.trim() && emergencyRequired) {
       nextErrors.emergencyPhone = 'Indica el teléfono de emergencia.';
     }
     if (mode === 'staff' && !joinedAt) nextErrors.joinedAt = 'Ingresa la fecha de ingreso.';
@@ -161,7 +168,7 @@ export function StudentForm({
         error={errors.birthDate}
       />
       <TextField
-        label="RUT (opcional)"
+        label={rutRequired ? 'RUT' : 'RUT (opcional)'}
         value={rut}
         onChangeText={setRut}
         onBlur={() => rut.trim() && setRut(formatRut(rut))}

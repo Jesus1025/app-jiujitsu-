@@ -17,7 +17,8 @@ import { fullName, todayIn } from '@/lib/format';
 
 /** Candidatos a graduación según los requisitos definidos por el profesor. */
 export default function GraduationScreen() {
-  const { academy } = useAcademy();
+  const { academy, settings, isOwner } = useAcademy();
+  const canAward = isOwner || settings.instructors_can_award_ranks;
   const today = todayIn(academy.timezone);
   const students = useStudents(academy.id);
   const { data: progress } = useStudentProgressList(academy.id);
@@ -28,7 +29,11 @@ export default function GraduationScreen() {
     .filter((s) => s.status === 'active')
     .map((student) => {
       const p = progress?.get(student.id);
-      const step = nextStep(p, belts, beltTrackFor(student.birth_date, today));
+      const step = nextStep(
+        p,
+        belts,
+        beltTrackFor(student.birth_date, today, settings.adult_belt_age),
+      );
       const status = requirementStatus(step, requirements, p, student.joined_at, today);
       const score = status
         ? Math.min(
@@ -70,7 +75,9 @@ export default function GraduationScreen() {
               right={
                 <BeltBadge belt={step?.belt} degree={step?.degree} showLabel={false} width={60} />
               }
-              onPress={() => router.push(`/students/${student.id}/rank`)}
+              onPress={() =>
+                router.push(canAward ? `/students/${student.id}/rank` : `/students/${student.id}`)
+              }
             />
           ))
         ) : (

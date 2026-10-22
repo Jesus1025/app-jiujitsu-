@@ -43,7 +43,7 @@ function Item({
 }
 
 export default function MoreScreen() {
-  const { academy, role, isStaff, isOwner, memberships, setActiveAcademy } = useAcademy();
+  const { academy, role, isStaff, isOwner, memberships, setActiveAcademy, settings } = useAcademy();
   const { data: allMemberships } = useMyMemberships();
   const { data: notifications } = useNotifications();
   const queryClient = useQueryClient();
@@ -80,7 +80,9 @@ export default function MoreScreen() {
         {isStaff ? (
           <Item icon="calendar-outline" title="Calendario y eventos" href="/calendar" />
         ) : null}
-        <Item icon="trophy-outline" title="Ranking de asistencia" href="/ranking" />
+        {isStaff || settings.show_ranking_to_students ? (
+          <Item icon="trophy-outline" title="Ranking de asistencia" href="/ranking" />
+        ) : null}
         <Item icon="chatbubbles-outline" title="Muro de la academia" href="/wall" />
         <Item icon="document-text-outline" title="Reglamento y documentos" href="/documents" />
         <Item icon="school-outline" title="Pruebas" href="/quizzes" />
